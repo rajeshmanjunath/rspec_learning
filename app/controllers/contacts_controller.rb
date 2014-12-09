@@ -49,7 +49,8 @@ class ContactsController < ApplicationController
 
   # PATCH/PUT /contacts/1
   # PATCH/PUT /contacts/1.json
-  def update             # ruby-2.1.1
+  def update
+    @contact = Contact.find(params[:id])
     respond_to do |format|
       if @contact.update(contact_params)
         format.html { redirect_to @contact, notice: 'Contact was successfully updated.' }
@@ -64,6 +65,7 @@ class ContactsController < ApplicationController
   # DELETE /contacts/1
   # DELETE /contacts/1.json
   def destroy
+    @contact = Contact.find(params[:id])
     @contact.destroy
     respond_to do |format|
       format.html { redirect_to contacts_url }

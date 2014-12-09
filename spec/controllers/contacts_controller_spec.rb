@@ -320,9 +320,10 @@ describe ContactsController do
 
        context "with invalid attributes" do
           it "does not save the new contact in the database" do
+            #:invalid_contact
             expect{
               post :create,
-              contact: attributes_for(:invalid_contact)
+              contact: attributes_for(:contact, firstname: nil)
               }.to_not change(Contact, :count)
           end
 
@@ -335,22 +336,78 @@ describe ContactsController do
 
  end
 
- #describe 'PUT #update' do
- #   context "with valid attributes" do
- #     it "updates the contact in the database"
- #     it "redirects to the contact"
- #   end
- #
- #    context "with invalid attributes" do
- #      it "does not update the contact"
- #      it "re-renders the #edit template"
- #    end
- #end
- #
- #describe 'DELETE #destroy' do
- #    it "deletes the contact from the database"
- #    it "redirects to users#index"
- #end
+ describe 'PUT/PATCH #update' do
+
+   before :each do
+     @contact = create(:contact,
+                        firstname: 'Lawrence', lastname: 'Smith')
+   end
+
+    context "with valid attributes" do
+      it "located the requested @contact"   do
+        post :update, id: @contact, contact: attributes_for(:contact)
+        expect(assigns(:contact)).to eq(@contact)
+      end
+
+      #it "located the requested @contact"   do
+      #  contact = create(:contact)
+      #  post :update, id: contact, contact: attributes_for(:contact)
+      #  expect(assigns(:contact)).to eq(contact)
+      #end
+
+      it "changes @contact's attributes" do
+         patch :update, id: @contact,
+         contact: attributes_for(:contact,
+                                    firstname: "Larry", lastname: "Smith")
+         @contact.reload
+         expect(@contact.firstname).to eq("Larry")
+         expect(@contact.lastname).to eq("Smith")
+      end
+
+      it "redirects to the updated contact" do
+         patch :update, id: @contact, contact: attributes_for(:contact)
+         expect(response).to redirect_to @contact
+      end
+
+    end
+
+     context "with invalid attributes" do
+       it "does not change the contact's attributes" do
+          patch :update, id: @contact,
+          contact: attributes_for(:contact,
+                                    firstname: "Larry", lastname: nil)
+          @contact.reload
+          expect(@contact.firstname).to_not eq("Larry")
+          expect(@contact.lastname).to eq("Smith")
+       end
+
+       it "re-renders the edit template" do
+          patch :update, id: @contact,
+          contact: attributes_for(:invalid_contact)
+          expect(response).to render_template :edit
+       end
+     end
+ end
+
+ describe 'DELETE #destroy' do
+   before :each do
+      @contact = create(:contact)
+   end
+
+   #my own testing
+   it "located the requested @contact"   do
+    # contact = create(:contact)
+     post :destroy, id: @contact
+     expect(assigns(:contact)).to eq(@contact)
+   end
+
+
+   it "deletes the contact" do
+      expect{
+        delete :destroy, id: @contact
+        }.to change(Contact,:count).by(-1)
+   end
+ end
 
 end     #describe contacts controller end
 
